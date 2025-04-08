@@ -1,2 +1,4 @@
-package com.example.promptsentinel.domain.member.dto;public interface MemberRepository {
+package com.example.promptsentinel.domain.member.dto;
+
+public class MemberRepository {
 }
