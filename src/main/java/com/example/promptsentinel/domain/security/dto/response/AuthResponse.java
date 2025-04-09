@@ -1,5 +1,6 @@
 package com.example.promptsentinel.domain.security.dto.response;
 
+import com.example.promptsentinel.domain.member.entity.MemberRole;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -16,6 +17,7 @@ public class AuthResponse {
     private String nickName;
     private String profileImage;
     private String accessToken;
+    private MemberRole memberRole;
     private String refreshToken;
     private Date accessTokenExpiration;
     private Date refreshTokenExpiration;

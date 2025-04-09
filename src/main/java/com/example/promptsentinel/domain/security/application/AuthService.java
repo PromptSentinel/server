@@ -67,6 +67,7 @@ public class AuthService {
                 .refreshToken(refreshToken)
                 .accessTokenExpiration(accessTokenExpiration)
                 .refreshTokenExpiration(refreshTokenExpiration)
+                .memberRole(memberRole)
                 .memberId(memberId)
                 .nickName(member.getNickName())
                 .profileImage(member.getProfileImage())
