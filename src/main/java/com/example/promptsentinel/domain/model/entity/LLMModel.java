@@ -36,10 +36,10 @@ public class LLMModel extends BaseTimeEntity {
     @Column(length = 1000)
     private List<String> headerList;
 
-    @Column
+    @Column(length = 5000)
     private String requestFormat;
 
-    @Column
+    @Column(length = 5000)
     private String responseFormat;
 
     @Column
