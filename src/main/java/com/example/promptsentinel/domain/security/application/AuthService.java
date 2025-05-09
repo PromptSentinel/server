@@ -1,8 +1,10 @@
 package com.example.promptsentinel.domain.security.application;
 
 
-import com.example.promptsentinel.domain.member.dto.MemberRepository;
-import com.example.promptsentinel.domain.member.dto.RefreshTokenRepository;
+import java.util.Date;
+
+import com.example.promptsentinel.domain.member.dao.MemberRepository;
+import com.example.promptsentinel.domain.member.dao.RefreshTokenRepository;
 import com.example.promptsentinel.domain.member.entity.Member;
 import com.example.promptsentinel.domain.member.entity.MemberRole;
 import com.example.promptsentinel.domain.member.entity.RefreshToken;
@@ -19,8 +21,6 @@ import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.Date;
-
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -31,7 +31,6 @@ public class AuthService {
 
     private final Oauth2Factory oauth2Factory;
 
-
     @Transactional
     public AuthResponse signIn(RegisterRequest request) {
         Oauth2Service oAuth2Service = oauth2Factory.of(request.getProviderName());
@@ -41,33 +40,38 @@ public class AuthService {
         return generateResponse(member);
     }
 
+    @Transactional
     public AuthResponse generateResponse(Member member) {
 
         Long memberId = member.getId();
         MemberRole memberRole = member.getRole();
 
+        // JwtUtil을 사용하여 토큰 생성
         String accessToken = jwtUtil.generateAccessToken(memberId, memberRole);
         String refreshToken = jwtUtil.generateRefreshToken(memberId);
 
-        refreshTokenRepository.findByMemberId(memberId)
+        // 리프레시 토큰 저장 또는 업데이트
+        refreshTokenRepository
+                .findByMemberId(memberId)
                 .ifPresentOrElse(
                         token -> {
                             token.updateRefreshToken(refreshToken);
+                            refreshTokenRepository.save(token);
                         },
-                        () -> refreshTokenRepository.save(new RefreshToken(memberId, refreshToken))
-                );
+                        () ->
+                                refreshTokenRepository.save(
+                                        new RefreshToken(memberId, refreshToken)));
 
-
+        // 토큰의 만료 시간 파싱
         Date accessTokenExpiration = jwtUtil.getTokenExpirationDate(accessToken, true);
         Date refreshTokenExpiration = jwtUtil.getTokenExpirationDate(refreshToken, false);
 
-
+        // 응답 객체 생성
         return AuthResponse.builder()
                 .accessToken(accessToken)
                 .refreshToken(refreshToken)
                 .accessTokenExpiration(accessTokenExpiration)
                 .refreshTokenExpiration(refreshTokenExpiration)
-                .memberRole(memberRole)
                 .memberId(memberId)
                 .nickName(member.getNickName())
                 .profileImage(member.getProfileImage())
@@ -75,19 +79,14 @@ public class AuthService {
     }
 
     private Member findOrSignUp(UserInfo userInfo) {
-        return memberRepository.findByProviderId(userInfo.getProviderId())
+        return memberRepository
+                .findByProviderId(userInfo.getProviderId())
                 .orElseGet(() -> saveMember(userInfo));
     }
 
     private Member saveMember(UserInfo userInfo) {
         Member member = userInfo.toEntity();
-        memberRepository.save(member);
         return memberRepository.save(member);
     }
 
-    @Transactional
-    public void withdraw() {
-        memberRepository.deleteAll();
-        refreshTokenRepository.deleteAll();
-    }
 }

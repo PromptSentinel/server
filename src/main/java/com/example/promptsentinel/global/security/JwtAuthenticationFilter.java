@@ -1,116 +1,104 @@
 package com.example.promptsentinel.global.security;
 
 
+
+import java.io.IOException;
+import java.util.Optional;
+
 import com.example.promptsentinel.domain.member.entity.MemberRole;
 import com.example.promptsentinel.domain.security.application.JwtTokenService;
 import com.example.promptsentinel.domain.security.dto.token.AccessTokenDto;
-import com.example.promptsentinel.domain.security.dto.token.RefreshTokenDto;
-import com.example.promptsentinel.global.util.CookieUtil;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.web.util.WebUtils;
 
-import java.io.IOException;
-import java.util.Optional;
+
+import io.jsonwebtoken.JwtException;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 import static com.example.promptsentinel.global.common.constants.SecurityConstants.*;
 
 @Slf4j
+@Component
 @RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final JwtTokenService jwtTokenService;
-    private final CookieUtil cookieUtil;
 
     @Override
     protected void doFilterInternal(
             HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
 
-        String accessTokenHeaderValue = extractAccessTokenFromHeader(request);
-        String accessTokenValue = extractAccessTokenFromCookie(request);
-        String refreshTokenValue = extractRefreshTokenFromCookie(request);
+        String requestPath = request.getServletPath();
 
-        if (accessTokenHeaderValue != null) {
-            AccessTokenDto accessTokenDto =
-                    jwtTokenService.retrieveOrReissueAccessToken(accessTokenHeaderValue);
-            if (accessTokenDto != null) {
-                setAuthenticationToContext(accessTokenDto.memberId(), accessTokenDto.memberRole());
-                filterChain.doFilter(request, response);
+        // 아직 로그인 되지 않았을 때
+        if (requestPath.contains("/api/v1/auth/register")) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+
+        String accessToken = extractAccessTokenFromHeader(request);
+        if (StringUtils.hasText(accessToken)) {
+            try {
+                AccessTokenDto accessTokenDto =
+                        jwtTokenService.retrieveOrReissueAccessToken(accessToken);
+                if (accessTokenDto != null) {
+                    setAuthenticationToContext(
+                            accessTokenDto.memberId(), accessTokenDto.memberRole());
+                    filterChain.doFilter(request, response);
+                } else {
+                    response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                    response.getWriter().write("Invalid Token");
+                    return;
+                }
+            } catch (JwtException ex) {
+                System.out.println("Invalid Token: " + ex.getMessage());
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                response.getWriter().write("Invalid or Expired JWT Token");
                 return;
             }
-        }
-
-        if (accessTokenValue == null || refreshTokenValue == null) {
-            filterChain.doFilter(request, response);
+        } else {
+            log.warn("No Authorization token found in request header");
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.getWriter().write("Authorization token is required");
             return;
-        }
-
-
-        AccessTokenDto accessTokenDto =
-                jwtTokenService.retrieveOrReissueAccessToken(accessTokenValue);
-
-        if (accessTokenDto != null) {
-            setAuthenticationToContext(
-                    accessTokenDto.memberId(), accessTokenDto.memberRole());
-            filterChain.doFilter(request, response);
-            return;
-        }
-
-        // AT가 만료된 경우 AT 재발급, 만료되지 않은 경우 null 반환
-        Optional<AccessTokenDto> reissuedAccessToken =
-                Optional.ofNullable(jwtTokenService.retrieveOrReissueAccessToken(accessTokenValue));
-        // RT 유효하면 파싱, 유효하지 않으면 null 반환
-        RefreshTokenDto refreshTokenDto = jwtTokenService.retrieveRefreshToken(refreshTokenValue);
-
-
-        // AT가 만료되었고, RT가 유효하면 AT, RT 재발급
-        if (refreshTokenDto != null) {
-            String accessToken =
-                    jwtTokenService.createAccessToken(
-                            refreshTokenDto.memberId(), MemberRole.USER);
-            String refreshToken = jwtTokenService.createRefreshToken(refreshTokenDto.memberId());
-
-            HttpHeaders httpHeaders = cookieUtil.generateTokenCookies(accessToken, refreshToken);
-            response.addHeader(
-                    HttpHeaders.SET_COOKIE, httpHeaders.getFirst(ACCESS_TOKEN_COOKIE_NAME));
-            response.addHeader(
-                    HttpHeaders.SET_COOKIE, httpHeaders.getFirst(REFRESH_TOKEN_COOKIE_NAME));
-
-            setAuthenticationToContext(refreshTokenDto.memberId(), MemberRole.USER);
         }
 
         filterChain.doFilter(request, response);
     }
 
-
     private void setAuthenticationToContext(Long memberId, MemberRole memberRole) {
-//        UserDetails userDetails = new PrincipalDetails(memberId, memberRole.toString());
-//        Authentication authentication =
-//                new UsernamePasswordAuthenticationToken(
-//                        userDetails, null, userDetails.getAuthorities());
-//        SecurityContextHolder.getContext().setAuthentication(authentication);
+        UsernamePasswordAuthenticationToken token =
+                getUserAuthenticationToken(memberId, memberRole);
+        SecurityContextHolder.getContext().setAuthentication(token);
+    }
+
+    private static UsernamePasswordAuthenticationToken getUserAuthenticationToken(
+            Long memberId, MemberRole memberRole) {
         UserDetails userDetails =
                 User.withUsername(memberId.toString())
                         .authorities(memberRole.toString())
                         .password("")
                         .build();
+
         UsernamePasswordAuthenticationToken token =
                 new UsernamePasswordAuthenticationToken(
-                        userDetails, null, userDetails.getAuthorities());
-        SecurityContextHolder.getContext().setAuthentication(token);
+                        memberId, null, userDetails.getAuthorities());
+        return token;
     }
-
 
     private static String extractAccessTokenFromHeader(HttpServletRequest request) {
         return Optional.ofNullable(request.getHeader(HttpHeaders.AUTHORIZATION))
