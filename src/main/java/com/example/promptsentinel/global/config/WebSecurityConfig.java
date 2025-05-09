@@ -62,7 +62,7 @@ public class WebSecurityConfig {
                                 (request, response, authException) -> response.setStatus(401)));
 
         http.addFilterBefore(
-                jwtAuthenticationFilter(jwtTokenService, cookieUtil),
+                jwtAuthenticationFilter(jwtTokenService),
                 UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
@@ -84,9 +84,8 @@ public class WebSecurityConfig {
     }
 
     @Bean
-    public JwtAuthenticationFilter jwtAuthenticationFilter(
-            JwtTokenService jwtTokenService, CookieUtil cookieUtil) {
-        return new JwtAuthenticationFilter(jwtTokenService, cookieUtil);
+    public JwtAuthenticationFilter jwtAuthenticationFilter(JwtTokenService jwtTokenService) {
+        return new JwtAuthenticationFilter(jwtTokenService);
     }
 }
 

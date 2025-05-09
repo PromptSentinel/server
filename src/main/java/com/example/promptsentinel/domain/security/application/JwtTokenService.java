@@ -1,6 +1,6 @@
 package com.example.promptsentinel.domain.security.application;
 
-import com.example.promptsentinel.domain.member.dto.RefreshTokenRepository;
+import com.example.promptsentinel.domain.member.dao.RefreshTokenRepository;
 import com.example.promptsentinel.domain.member.entity.MemberRole;
 import com.example.promptsentinel.domain.member.entity.RefreshToken;
 import com.example.promptsentinel.domain.security.dto.token.AccessTokenDto;
@@ -27,6 +27,7 @@ public class JwtTokenService {
     public AccessTokenDto createAccessTokenDto(Long memberId, MemberRole memberRole) {
         return jwtUtil.generateAccessTokenDto(memberId, memberRole);
     }
+
 
     public String createRefreshToken(Long memberId) {
         String token = jwtUtil.generateRefreshToken(memberId);

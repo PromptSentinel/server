@@ -62,12 +62,6 @@ public class AuthController {
         }
     }
 
-    @DeleteMapping("/withdraw")
-    public void withdraw() {
-        authService.withdraw();
-    }
-
-
 
 }
 

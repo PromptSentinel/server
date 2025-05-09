@@ -33,7 +33,7 @@ public class LLMModel extends BaseTimeEntity {
     @Column
     private String APIKey;
 
-    @Column
+    @Column(length = 1000)
     private List<String> headerList;
 
     @Column
@@ -42,15 +42,21 @@ public class LLMModel extends BaseTimeEntity {
     @Column
     private String responseFormat;
 
+    @Column
+    private String attributeName;
+
     @Builder
-    public LLMModel(Member member, String modelName, String APIKey, List<String> headerList, String requestFormat, String responseFormat) {
+    public LLMModel(Member member, String modelName, String modelUrl,  String APIKey, List<String> headerList, String requestFormat, String responseFormat, String attributeName) {
         this.member = member;
         this.modelName = modelName;
+        this.modelUrl = modelUrl;
         this.APIKey = APIKey;
         this.headerList = List.copyOf(headerList);
         this.requestFormat = requestFormat;
         this.responseFormat = responseFormat;
+        this.attributeName = attributeName;
     }
+
 
 }
 
