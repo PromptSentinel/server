@@ -6,6 +6,8 @@ import com.example.promptsentinel.domain.model.dao.LLMModelRepository;
 import com.example.promptsentinel.domain.model.dto.LLMModelRequest;
 import com.example.promptsentinel.domain.model.dto.LLMResponse;
 import com.example.promptsentinel.domain.model.entity.LLMModel;
+import com.example.promptsentinel.domain.prompt.entity.Prompt;
+import com.example.promptsentinel.domain.prompt.service.PromptService;
 import com.example.promptsentinel.global.common.error.CustomException;
 import com.example.promptsentinel.global.common.error.ErrorCode;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -18,6 +20,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.ClientResponse;
 import org.springframework.web.reactive.function.client.WebClient;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -28,6 +31,7 @@ import java.util.regex.Pattern;
 public class LLMClientService {
 
     private final LLMModelRepository llmModelRepository;
+    private final PromptService promptService;
     private final MemberService memberService;
 
 
@@ -41,6 +45,28 @@ public class LLMClientService {
                 .llmResponse(response)
                 .build();
     }
+
+
+    //promptList들을 통해 LLMResponse List 반환
+    public List<LLMResponse> evaluatePromptListAgainstLLM(Long memberId, LLMModelRequest request) {
+        LLMModel llmModel = saveModel(memberId, request);
+        List<Prompt> promptList = promptService.getQuestion();
+
+        List<LLMResponse> llmResponseList = new ArrayList<>();
+        for(Prompt prompt : promptList) {
+            String response = sendPrompt(llmModel, prompt.getQuestion());
+            log.info(response);
+            LLMResponse llmResponse = LLMResponse.builder()
+                    .llmRequest(prompt.getQuestion())
+                    .llmResponse(response)
+                    .build();
+
+            llmResponseList.add(llmResponse);
+        }
+
+        return llmResponseList;
+    }
+
 
 
     public String sendPrompt(LLMModel llmModel, String prompt) {
