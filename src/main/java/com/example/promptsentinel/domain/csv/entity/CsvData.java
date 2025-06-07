@@ -17,18 +17,34 @@ public class CsvData extends BaseTimeEntity {
     private Long id;
 
     @Column(columnDefinition = "TEXT")
+    private String strategy;
+
+    @Column(columnDefinition = "TEXT")
     private String question;
 
     @Column(columnDefinition = "TEXT")
     private String response;
 
-    @Column(length = 50)
-    private String label;
+    @Column
+    private int RoBERTaLabel;
 
-    public CsvData(String question, String response, String label){
+    @Column
+    private int DeBERTaLabel;
+
+    @Column
+    private int BARTLabel;
+
+    @Column
+    private int ELECTRALabel;
+
+    public CsvData(String strategy, String question, String response,  int RoBERTaLabel, int DeBERTaLabel, int BARTLabel, int ELECTRALabel){
+        this.strategy = strategy;
         this.question = question;
         this.response = response;
-        this.label = label;
+        this.RoBERTaLabel = RoBERTaLabel;
+        this.DeBERTaLabel = DeBERTaLabel;
+        this.BARTLabel = BARTLabel;
+        this.ELECTRALabel = ELECTRALabel;
 
     }
 }

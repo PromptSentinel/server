@@ -78,7 +78,7 @@ public class CsvService {
             CsvData entity = new CsvData();
             entity.setQuestion(csvData.getQuestion());
             entity.setResponse(csvData.getResponse());
-            entity.setLabel(csvData.getLabel());
+            //entity.setLabel(csvData.getLabel());
             entities.add(entity);
         }
 
@@ -132,7 +132,7 @@ public class CsvService {
             fields.add(currentField.toString());
 
             if (fields.size() >= 3) {
-                return new CsvData(fields.get(0), fields.get(1), fields.get(2));
+               // return new CsvData(fields.get(0), fields.get(1), fields.get(2));
             }
 
         } catch (Exception e) {
