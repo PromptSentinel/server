@@ -6,13 +6,12 @@ import com.example.promptsentinel.domain.model.dao.LLMModelRepository;
 import com.example.promptsentinel.domain.model.dto.LLMModelRequest;
 import com.example.promptsentinel.domain.model.dto.LLMResponse;
 import com.example.promptsentinel.domain.model.entity.LLMModel;
+import com.example.promptsentinel.domain.prompt.dao.PromptRepository;
 import com.example.promptsentinel.domain.prompt.entity.Prompt;
 import com.example.promptsentinel.domain.prompt.service.PromptService;
 import com.example.promptsentinel.global.common.error.CustomException;
 import com.example.promptsentinel.global.common.error.ErrorCode;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.*;
@@ -31,9 +30,49 @@ import java.util.regex.Pattern;
 public class LLMClientService {
 
     private final LLMModelRepository llmModelRepository;
+    private final PromptRepository promptRepository;
     private final PromptService promptService;
     private final MemberService memberService;
 
+    public List<LLMResponse> processMultiplePromptEntities(Long memberId, LLMModel llmModel ) {
+        List<Prompt> promptEntities = promptRepository.findAll();
+        List<LLMResponse> llmResponseList = new ArrayList<>();
+
+        for (Prompt promptEntity : promptEntities) {
+            try {
+                String promptText = promptEntity.getQuestion();
+                String response = sendPrompt(llmModel, promptText);
+                log.info("Prompt ID: {}, Question: {}, Response: {}",
+                        promptEntity.getId(), promptText, response);
+
+                LLMResponse llmResponse = LLMResponse.builder()
+                        .promptId(promptEntity.getId())
+                        .strategy(promptEntity.getStrategy())
+                        .llmRequest(promptText)
+                        .llmResponse(response)
+                        .build();
+
+                llmResponseList.add(llmResponse);
+
+                // API 호출 간격 조절
+                Thread.sleep(100);
+
+            } catch (Exception e) {
+                log.error("Error processing prompt entity ID: {}, Question: {}",
+                        promptEntity.getId(), promptEntity.getQuestion(), e);
+
+                LLMResponse errorResponse = LLMResponse.builder()
+                        .promptId(promptEntity.getId())
+                        .llmRequest(promptEntity.getQuestion())
+                        .llmResponse("Error: " + e.getMessage())
+                        .build();
+
+                llmResponseList.add(errorResponse);
+            }
+        }
+
+        return llmResponseList;
+    }
 
     //추후 프롬프트, return 값 변경
     public LLMResponse evaluatePromptAgainstLLM(Long memberId, LLMModelRequest request) {
@@ -77,33 +116,24 @@ public class LLMClientService {
             // 요청 본문 생성
             String requestBody = createRequestBody(llmModel, prompt);
 
-            // HTTP 요청 생성
-            HttpEntity<String> requestEntity = new HttpEntity<>(requestBody, headers);
-
-
-            //api 요청
-            ClientResponse clientResponse = WebClient.create()
-                    .method(HttpMethod.POST)
+            // WebClient를 사용한 API 요청 (새로운 방식)
+            String responseBody = WebClient.create()
+                    .post()  // method(HttpMethod.POST) 대신 post() 사용
                     .uri(llmModel.getModelUrl())
-                    .headers(httpHeaders -> httpHeaders.addAll(headers))  // HttpHeaders 객체 전달
-                    .bodyValue(requestBody)  // body 설정
-                    .exchange()
+                    .headers(httpHeaders -> httpHeaders.addAll(headers))
+                    .bodyValue(requestBody)
+                    .retrieve()  // exchange() 대신 retrieve() 사용
+                    .bodyToMono(String.class)
                     .block();
 
-            ResponseEntity<String> responseEntity = ResponseEntity
-                    .status(clientResponse.statusCode())
-                    .headers(clientResponse.headers().asHttpHeaders())
-                    .body(clientResponse.bodyToMono(String.class).block());
+            log.info(responseBody);
 
-
-            log.info(responseEntity.getBody());
-
-            return getResponse(responseEntity.getBody(), llmModel.getAttributeName());
+            return getResponse(responseBody, llmModel.getAttributeName());
 
         } catch (Exception e) {
+            log.error("LLM API 호출 실패: {}", e.getMessage(), e);
             throw new CustomException(ErrorCode.LLM_API_FAILED);
         }
-
     }
 
 
@@ -160,7 +190,7 @@ public class LLMClientService {
 
 
     //LLMModel 객체 생성
-    private LLMModel saveModel(Long memberId, LLMModelRequest request) {
+    public LLMModel saveModel(Long memberId, LLMModelRequest request) {
         Member member = memberService.getMember(memberId);
         LLMModel model = LLMModel.builder()
                 .member(member)
