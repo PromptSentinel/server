@@ -13,7 +13,6 @@ public interface EvaluationRepository extends JpaRepository<Evaluation, Long> {
     Optional<Evaluation> findById(Long id);
     Optional<List<Evaluation>> findByMember(Member member);
 
-    boolean existsByPlaceGoogleId(String placeId);
 
     default Evaluation findByIdOrElseThrow(Long id) {
         return findById(id)

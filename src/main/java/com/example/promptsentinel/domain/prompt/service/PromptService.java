@@ -18,7 +18,6 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class PromptService {
     private final PromptRepository promptRepository;
-    private final LLMClientService llmClientService;
 
     public List<Prompt> getQuestion(){
         return promptRepository.findAll();
