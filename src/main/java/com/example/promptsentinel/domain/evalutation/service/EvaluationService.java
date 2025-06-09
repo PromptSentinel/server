@@ -1,5 +1,6 @@
 package com.example.promptsentinel.domain.evalutation.service;
 
+import com.example.promptsentinel.domain.csv.entity.CsvData;
 import com.example.promptsentinel.domain.evalutation.Evaluation;
 import com.example.promptsentinel.domain.evalutation.dao.EvaluationRepository;
 import com.example.promptsentinel.domain.evalutation.dto.EvaluationDetailResponse;
@@ -7,6 +8,7 @@ import com.example.promptsentinel.domain.evalutation.dto.EvaluationListResponse;
 import com.example.promptsentinel.domain.evalutation.dto.EvaluationResponse;
 import com.example.promptsentinel.domain.member.dao.MemberRepository;
 import com.example.promptsentinel.domain.member.entity.Member;
+import com.example.promptsentinel.domain.model.entity.LLMModel;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -28,8 +30,8 @@ public class EvaluationService {
                 evaluationList.stream()
                         .map(evaluation -> EvaluationResponse.builder()
                                 .id(evaluation.getId())
-                                .llmModel(evaluation.getLlmModel())
-                                .percentage(evaluation.getPercentage())
+                                .modelName(evaluation.getLlmModel().getModelName())
+                                .flag(evaluation.getPercentage())
                                 .member(evaluation.getMember())
                                 .build())
                         .collect(Collectors.toList())
@@ -43,8 +45,26 @@ public class EvaluationService {
                 .id(evaluationId)
                 .llmModel(evaluation.getLlmModel())
                 .percentage(evaluation.getPercentage())
-                .promptPair(evaluation.getPromptPair())
+                .promptEntity(evaluation.getPromptEntity())
                 .member(evaluation.getMember())
+                .build();
+    }
+
+    public EvaluationDetailResponse saveEvaluation(LLMModel llmModel, List<CsvData> csvDataList){
+
+        Evaluation evaluation = evaluationRepository.save(Evaluation.builder()
+                .llmModel(llmModel)
+                .member(llmModel.getMember())
+                .percentage(0.0)
+                .promptEntity(csvDataList)
+                .build());
+
+        return EvaluationDetailResponse.builder()
+                .id(evaluation.getId())
+                .llmModel(evaluation.getLlmModel())
+                .promptEntity(evaluation.getPromptEntity())
+                .member(evaluation.getMember())
+                .percentage(evaluation.getPercentage())
                 .build();
     }
 }

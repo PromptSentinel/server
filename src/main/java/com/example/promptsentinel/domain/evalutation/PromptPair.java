@@ -1,5 +1,7 @@
 package com.example.promptsentinel.domain.evalutation;
 
+import com.example.promptsentinel.domain.member.entity.Member;
+import com.example.promptsentinel.domain.model.entity.LLMModel;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -15,15 +17,16 @@ public class PromptPair {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long id;
 
+
     @Column
     private String prompt;
 
     @Column
     private String response;
 
-    //나중에 enum으로 바꿀 예정
+
     @Column
-    private String attackType;
+    private String strategy;
 
     @Column
     private boolean evaluationResult;

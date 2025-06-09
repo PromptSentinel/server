@@ -8,5 +8,4 @@ import java.util.List;
 
 @Repository
 public interface CsvDataRepository extends JpaRepository<CsvData, Long> {
-    List<CsvData> findByLabel(String label);
 }
