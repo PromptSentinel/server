@@ -12,12 +12,16 @@ import com.example.promptsentinel.domain.prompt.service.PromptService;
 import com.example.promptsentinel.global.common.error.CustomException;
 import com.example.promptsentinel.global.common.error.ErrorCode;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -35,9 +39,11 @@ public class LLMClientService {
 
     public List<LLMResponse> processMultiplePromptEntities(Long memberId, LLMModel llmModel ) {
         List<Prompt> promptEntities = promptRepository.findAll();
+
         List<LLMResponse> llmResponseList = new ArrayList<>();
 
-        for (Prompt promptEntity : promptEntities) {
+        for (int i=0; i<10; i++) {
+            Prompt promptEntity = promptEntities.get(i);
             try {
                 String promptText = promptEntity.getGeneratedPrompt();
                 String response = sendPrompt(llmModel, promptText);
@@ -62,6 +68,7 @@ public class LLMClientService {
 
                 LLMResponse errorResponse = LLMResponse.builder()
                         .promptId(promptEntity.getId())
+                        .strategy(promptEntity.getStrategy())
                         .llmRequest(promptEntity.getGeneratedPrompt())
                         .llmResponse("Error: " + e.getMessage())
                         .build();
@@ -95,6 +102,7 @@ public class LLMClientService {
             String response = sendPrompt(llmModel, prompt.getGeneratedPrompt());
             log.info(response);
             LLMResponse llmResponse = LLMResponse.builder()
+                    .strategy(prompt.getStrategy())
                     .llmRequest(prompt.getGeneratedPrompt())
                     .llmResponse(response)
                     .build();
@@ -140,6 +148,8 @@ public class LLMClientService {
     private HttpHeaders createHeaders(LLMModel llmModel) {
         HttpHeaders headers = new HttpHeaders();
 
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.setAcceptCharset(List.of(StandardCharsets.UTF_8));
 
         List<String> headerList = llmModel.getHeaderList();
         for (String header : headerList) {
@@ -169,7 +179,10 @@ public class LLMClientService {
         String requestTemplate = llmModel.getRequestFormat();
 
         log.info("request template" + requestTemplate);
-        return requestTemplate.replace("\"prompt\"", "\"" + prompt + "\"");
+        ObjectMapper objectMapper = new ObjectMapper();
+        JsonNode node = objectMapper.readTree(requestTemplate);
+        ((ObjectNode) node).put("prompt", prompt);
+        return objectMapper.writeValueAsString(node);
     }
 
     private String getResponse(String responseBody, String attributeName) {

@@ -6,6 +6,7 @@ import com.example.promptsentinel.domain.csv.dao.CsvDataRepository;
 import com.example.promptsentinel.domain.model.dto.LLMResponse;
 import com.example.promptsentinel.domain.prompt.entity.Prompt;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.io.*;
@@ -15,6 +16,7 @@ import java.util.List;
 import java.util.Random;
 
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public class CsvService {
     private final CsvDataRepository csvDataRepository;
@@ -120,20 +122,21 @@ public class CsvService {
 
             // 마지막 필드 추가
             fields.add(currentField.toString());
+            log.info("fields : " + fields.toString());
 
             // CSV 읽기용: strategy, prompt, response, RoBERTaLabel, DeBERTaLabel, BARTLabel, ELECTRALabel
             if (fields.size() >= 7) {
                 CsvData csvData = new CsvData();
-                csvData.setStrategy(fields.get(0));
-                csvData.setQuestion(fields.get(1));
-                csvData.setResponse(fields.get(2));
+                csvData.setStrategy(fields.get(2));
+                csvData.setQuestion(fields.get(4));
+                csvData.setResponse(fields.get(5));
 
                 // 라벨 필드들 파싱 (숫자로 변환)
                 try {
-                    csvData.setRoBERTaLabel(Integer.parseInt(fields.get(3).trim()));
-                    csvData.setDeBERTaLabel(Integer.parseInt(fields.get(4).trim()));
-                    csvData.setBARTLabel(Integer.parseInt(fields.get(5).trim()));
-                    csvData.setELECTRALabel(Integer.parseInt(fields.get(6).trim()));
+                    csvData.setRoBERTaLabel(extractLabelNumber(fields.get(6).trim()));
+                    csvData.setDeBERTaLabel(extractLabelNumber(fields.get(7).trim()));
+                    csvData.setBARTLabel(extractLabelNumber(fields.get(8).trim()));
+                    csvData.setELECTRALabel(extractLabelNumber(fields.get(9).trim()));
                 } catch (NumberFormatException e) {
                     System.err.println("라벨 값 파싱 오류: " + line);
                     // 기본값 설정
@@ -152,6 +155,15 @@ public class CsvService {
         }
 
         return null;
+    }
+
+    private int extractLabelNumber(String labelStr) {
+        String numberStr = labelStr.replaceAll("[^0-9]", "");
+        if (numberStr.isEmpty()) {
+            // 숫자가 없으면 기본값 0 반환하거나 예외 처리 가능
+            return 0;
+        }
+        return Integer.parseInt(numberStr);
     }
 
     /**
