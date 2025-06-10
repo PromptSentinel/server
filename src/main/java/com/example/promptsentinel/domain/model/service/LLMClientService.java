@@ -16,7 +16,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
-import org.springframework.web.reactive.function.client.ClientResponse;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import java.util.ArrayList;
@@ -40,7 +39,7 @@ public class LLMClientService {
 
         for (Prompt promptEntity : promptEntities) {
             try {
-                String promptText = promptEntity.getQuestion();
+                String promptText = promptEntity.getGeneratedPrompt();
                 String response = sendPrompt(llmModel, promptText);
                 log.info("Prompt ID: {}, Question: {}, Response: {}",
                         promptEntity.getId(), promptText, response);
@@ -59,11 +58,11 @@ public class LLMClientService {
 
             } catch (Exception e) {
                 log.error("Error processing prompt entity ID: {}, Question: {}",
-                        promptEntity.getId(), promptEntity.getQuestion(), e);
+                        promptEntity.getId(), promptEntity.getGeneratedPrompt(), e);
 
                 LLMResponse errorResponse = LLMResponse.builder()
                         .promptId(promptEntity.getId())
-                        .llmRequest(promptEntity.getQuestion())
+                        .llmRequest(promptEntity.getGeneratedPrompt())
                         .llmResponse("Error: " + e.getMessage())
                         .build();
 
@@ -93,10 +92,10 @@ public class LLMClientService {
 
         List<LLMResponse> llmResponseList = new ArrayList<>();
         for(Prompt prompt : promptList) {
-            String response = sendPrompt(llmModel, prompt.getQuestion());
+            String response = sendPrompt(llmModel, prompt.getGeneratedPrompt());
             log.info(response);
             LLMResponse llmResponse = LLMResponse.builder()
-                    .llmRequest(prompt.getQuestion())
+                    .llmRequest(prompt.getGeneratedPrompt())
                     .llmResponse(response)
                     .build();
 
