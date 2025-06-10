@@ -47,12 +47,12 @@ public class WebSecurityConfig {
         http.authorizeHttpRequests(
                 authorize ->
                         authorize
-
-
                                 .requestMatchers("/api/v1/auth/register\"")
                                 .authenticated() // 소셜 로그인 임시 토큰으로 인증
                                 .requestMatchers("/api/v1/**")
                                 .permitAll() // 임시로 모든 요청 허용
+                                .requestMatchers("/api/**")
+                                .permitAll()
                                 .anyRequest()
                                 .authenticated());
 
