@@ -5,7 +5,12 @@ import com.example.promptsentinel.domain.prompt.dto.PromptListRequest;
 import com.example.promptsentinel.domain.prompt.entity.Prompt;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -30,8 +35,28 @@ public class PromptService {
                 .collect(Collectors.toList());
     }
 
-//    public EvaluationDetailResponse getResult(LLMModel llmModel){
-//        List<Prompt> promptList = getQuestion();
-//
-//    }
+    public void importPromptsFromMultipartFile(MultipartFile file) {
+        try (BufferedReader br = new BufferedReader(new InputStreamReader(file.getInputStream()))) {
+            String line;
+            boolean isFirst = true;
+            while ((line = br.readLine()) != null) {
+                if (isFirst) {
+                    isFirst = false;
+                    continue;
+                }
+                String[] columns = line.split(",", -1);
+
+                Prompt prompt = Prompt.builder()
+                        .scenarioName(columns[1].trim())
+                        .strategy(columns[2].trim())
+                        .question(columns[3].trim())
+                        .generatedPrompt(columns[4].trim())
+                        .build();
+
+                promptRepository.save(prompt);
+            }
+        } catch (IOException e) {
+            throw new RuntimeException("CSV 파싱 실패", e);
+        }
+    }
 }
