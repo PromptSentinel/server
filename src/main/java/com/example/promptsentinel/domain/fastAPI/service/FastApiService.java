@@ -21,7 +21,7 @@ public class FastApiService {
 
     private final RestTemplate restTemplate;
 
-    private static final String FASTAPI_BASE_URL = "http://localhost:8000";
+    private static final String FASTAPI_BASE_URL = "http://203.253.23.37:8000";
 
     /**
      * CSV 파일을 FastAPI로 전송하여 분류 결과를 받아옴

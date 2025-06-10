@@ -2,7 +2,6 @@ package com.example.promptsentinel.domain.model.controller;
 
 import com.example.promptsentinel.domain.csv.entity.CsvData;
 import com.example.promptsentinel.domain.csv.service.CsvService;
-import com.example.promptsentinel.domain.evalutation.dto.EvaluationDetailResponse;
 import com.example.promptsentinel.domain.evalutation.service.EvaluationService;
 import com.example.promptsentinel.domain.fastAPI.dto.FastApiResponse;
 import com.example.promptsentinel.domain.fastAPI.service.FastApiService;
@@ -18,9 +17,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 
 @RestController
