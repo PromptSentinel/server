@@ -50,6 +50,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             return;
         }
 
+        if (requestPath.contains("/api/prompts/upload")) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+
         String accessToken = extractAccessTokenFromHeader(request);
         if (StringUtils.hasText(accessToken)) {
             try {
