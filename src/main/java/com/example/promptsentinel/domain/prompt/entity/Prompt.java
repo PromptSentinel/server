@@ -2,10 +2,8 @@ package com.example.promptsentinel.domain.prompt.entity;
 
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 @Entity
 @Table(name = "prompt")
@@ -21,5 +19,11 @@ public class Prompt {
     private String strategy;
 
     @Column
+    private String scenarioName;
+
+    @Column
     private String question;
+
+    @Column
+    private String generatedPrompt;
 }
