@@ -41,6 +41,8 @@ public class EvaluationService {
 
     public EvaluationDetailResponse getEvaluationDetail(Long memberId, Long evaluationId) {
         Evaluation evaluation = evaluationRepository.findByIdOrElseThrow(evaluationId);
+
+
         return EvaluationDetailResponse.builder()
                 .id(evaluationId)
                 .llmModel(evaluation.getLlmModel())

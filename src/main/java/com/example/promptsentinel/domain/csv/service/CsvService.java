@@ -57,6 +57,8 @@ public class CsvService {
                     continue;
                 }
 
+                System.out.println("line : " + line.length());
+
                 CsvData csvData = parseCsvLine(line);
                 if (csvData != null) {
                     csvDataList.add(csvData);
@@ -125,18 +127,18 @@ public class CsvService {
             log.info("fields : " + fields.toString());
 
             // CSV 읽기용: strategy, prompt, response, RoBERTaLabel, DeBERTaLabel, BARTLabel, ELECTRALabel
-            if (fields.size() >= 7) {
+            if (fields.size() >= 4) {
                 CsvData csvData = new CsvData();
-                csvData.setStrategy(fields.get(2));
-                csvData.setQuestion(fields.get(4));
-                csvData.setResponse(fields.get(5));
+                csvData.setStrategy(fields.get(1));
+                csvData.setQuestion(fields.get(2));
+                csvData.setResponse(fields.get(3));
 
                 // 라벨 필드들 파싱 (숫자로 변환)
                 try {
-                    csvData.setRoBERTaLabel(extractLabelNumber(fields.get(6).trim()));
-                    csvData.setDeBERTaLabel(extractLabelNumber(fields.get(7).trim()));
-                    csvData.setBARTLabel(extractLabelNumber(fields.get(8).trim()));
-                    csvData.setELECTRALabel(extractLabelNumber(fields.get(9).trim()));
+                    csvData.setRoBERTaLabel(extractLabelNumber(fields.get(4).trim()));
+                    csvData.setDeBERTaLabel(extractLabelNumber(fields.get(5).trim()));
+                    csvData.setBARTLabel(extractLabelNumber(fields.get(6).trim()));
+                    csvData.setELECTRALabel(extractLabelNumber(fields.get(7).trim()));
                 } catch (NumberFormatException e) {
                     System.err.println("라벨 값 파싱 오류: " + line);
                     // 기본값 설정
