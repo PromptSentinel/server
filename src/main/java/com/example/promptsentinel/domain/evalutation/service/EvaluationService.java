@@ -20,8 +20,8 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class EvaluationService {
-    private EvaluationRepository evaluationRepository;
-    private MemberRepository memberRepository;
+    private final EvaluationRepository evaluationRepository;
+    private final MemberRepository memberRepository;
     public EvaluationListResponse getEvaluaionList(Long memberId) {
         Member member = memberRepository.findByIdOrElseThrow(memberId);
         List<Evaluation> evaluationList = evaluationRepository.findByMemberOrElseThrow(member);
@@ -41,6 +41,8 @@ public class EvaluationService {
 
     public EvaluationDetailResponse getEvaluationDetail(Long memberId, Long evaluationId) {
         Evaluation evaluation = evaluationRepository.findByIdOrElseThrow(evaluationId);
+
+
         return EvaluationDetailResponse.builder()
                 .id(evaluationId)
                 .llmModel(evaluation.getLlmModel())
