@@ -24,9 +24,9 @@ public class Prompt {
     @Column
     private String scenarioName;
 
-    @Column
+    @Column(length = 1000)
     private String question;
 
-    @Column
+    @Column(length = 10000)
     private String generatedPrompt;
 }
