@@ -1,6 +1,6 @@
 package com.example.promptsentinel.domain.evalutation.dao;
 
-import com.example.promptsentinel.domain.evalutation.Evaluation;
+import com.example.promptsentinel.domain.evalutation.entity.Evaluation;
 import com.example.promptsentinel.domain.member.entity.Member;
 import com.example.promptsentinel.global.common.error.CustomException;
 import com.example.promptsentinel.global.common.error.ErrorCode;

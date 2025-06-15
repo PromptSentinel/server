@@ -1,4 +1,4 @@
-package com.example.promptsentinel.domain.evalutation;
+package com.example.promptsentinel.domain.evalutation.entity;
 
 import com.example.promptsentinel.domain.csv.entity.CsvData;
 import com.example.promptsentinel.domain.member.entity.Member;
@@ -42,6 +42,10 @@ public class Evaluation extends BaseTimeEntity {
 
     @Column
     private String ELECTRALabelErrorCount;
+
+    @OneToMany
+    @JoinColumn(name = "evaluation_id")
+    private List<ModelEvaluation> modelEvaluations;
 
 
     @OneToMany

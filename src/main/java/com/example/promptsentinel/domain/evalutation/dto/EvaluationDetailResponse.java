@@ -27,4 +27,6 @@ public class EvaluationDetailResponse {
     private String ELECTRALabelErrorCount;
 
     private List<CsvData> promptEntity;
+
+    private List<ModelEvaluationResponse> modelEvaluationResponses;
 }
