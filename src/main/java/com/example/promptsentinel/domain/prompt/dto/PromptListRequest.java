@@ -8,5 +8,5 @@ import java.util.List;
 @Getter
 @Setter
 public class PromptListRequest {
-    private List<PromptRequeat> promptRequeatList;
+    private List<PromptRequest> promptRequeatList;
 }

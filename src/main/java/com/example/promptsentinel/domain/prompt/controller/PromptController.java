@@ -1,15 +1,11 @@
 package com.example.promptsentinel.domain.prompt.controller;
 
-import com.example.promptsentinel.domain.model.dto.LLMModelRequest;
-import com.example.promptsentinel.domain.model.dto.LLMResponse;
 import com.example.promptsentinel.domain.prompt.dto.PromptListRequest;
-import com.example.promptsentinel.domain.prompt.dto.PromptRequeat;
 import com.example.promptsentinel.domain.prompt.entity.Prompt;
 import com.example.promptsentinel.domain.prompt.service.PromptService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 

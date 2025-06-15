@@ -1,12 +1,11 @@
 package com.example.promptsentinel.domain.prompt.dto;
 
-import jakarta.persistence.Column;
 import lombok.Getter;
 import lombok.Setter;
 
 @Getter
 @Setter
-public class PromptRequeat {
+public class PromptRequest {
 
     private String scenarioName;
     private String strategy;
