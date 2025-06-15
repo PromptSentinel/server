@@ -1,6 +1,7 @@
 package com.example.promptsentinel.domain.evalutation.dto;
 
 import com.example.promptsentinel.domain.member.entity.Member;
+import jakarta.persistence.Column;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -13,6 +14,12 @@ public class EvaluationResponse {
 
     private String modelName;
 
-    private Double flag;
+    private String RoBERTaLabelErrorCount;
+
+    private String DeBERTaLabelErrorCount;
+
+    private String BARTLabelErrorCount;
+
+    private String ELECTRALabelErrorCount;
 
 }

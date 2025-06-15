@@ -32,7 +32,16 @@ public class Evaluation extends BaseTimeEntity {
     private LLMModel llmModel;
 
     @Column
-    private Double percentage;
+    private String RoBERTaLabelErrorCount;
+
+    @Column
+    private String DeBERTaLabelErrorCount;
+
+    @Column
+    private String BARTLabelErrorCount;
+
+    @Column
+    private String ELECTRALabelErrorCount;
 
 
     @OneToMany

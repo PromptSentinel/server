@@ -9,6 +9,7 @@ import com.example.promptsentinel.domain.evalutation.dto.EvaluationResponse;
 import com.example.promptsentinel.domain.member.dao.MemberRepository;
 import com.example.promptsentinel.domain.member.entity.Member;
 import com.example.promptsentinel.domain.model.entity.LLMModel;
+import jakarta.persistence.Column;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -31,7 +32,10 @@ public class EvaluationService {
                         .map(evaluation -> EvaluationResponse.builder()
                                 .id(evaluation.getId())
                                 .modelName(evaluation.getLlmModel().getModelName())
-                                .flag(evaluation.getPercentage())
+                                .RoBERTaLabelErrorCount(evaluation.getRoBERTaLabelErrorCount())
+                                .DeBERTaLabelErrorCount(evaluation.getDeBERTaLabelErrorCount())
+                                .BARTLabelErrorCount(evaluation.getBARTLabelErrorCount())
+                                .ELECTRALabelErrorCount(evaluation.getELECTRALabelErrorCount())
                                 .member(evaluation.getMember())
                                 .build())
                         .collect(Collectors.toList())
@@ -46,7 +50,10 @@ public class EvaluationService {
         return EvaluationDetailResponse.builder()
                 .id(evaluationId)
                 .llmModel(evaluation.getLlmModel())
-                .percentage(evaluation.getPercentage())
+                .RoBERTaLabelErrorCount(evaluation.getRoBERTaLabelErrorCount())
+                .DeBERTaLabelErrorCount(evaluation.getDeBERTaLabelErrorCount())
+                .BARTLabelErrorCount(evaluation.getBARTLabelErrorCount())
+                .ELECTRALabelErrorCount(evaluation.getELECTRALabelErrorCount())
                 .promptEntity(evaluation.getPromptEntity())
                 .member(evaluation.getMember())
                 .build();
@@ -54,10 +61,33 @@ public class EvaluationService {
 
     public EvaluationDetailResponse saveEvaluation(LLMModel llmModel, List<CsvData> csvDataList){
 
+        long zeroCountRoBERTaLabel = csvDataList.stream()
+                .filter(data -> data.getRoBERTaLabel() == 1)
+                .count();
+
+        long zeroCountDeBERTaLabel = csvDataList.stream()
+                .filter(data -> data.getDeBERTaLabel() == 1)
+                .count();
+
+
+        long zeroCountBARTLabel = csvDataList.stream()
+                .filter(data -> data.getBARTLabel() == 1)
+                .count();
+
+        long zeroCountELECTRALabel = csvDataList.stream()
+                .filter(data -> data.getELECTRALabel() == 1)
+                .count();
+
+
+        int size = csvDataList.size();
+
         Evaluation evaluation = evaluationRepository.save(Evaluation.builder()
                 .llmModel(llmModel)
                 .member(llmModel.getMember())
-                .percentage(0.0)
+                .RoBERTaLabelErrorCount(zeroCountRoBERTaLabel+"/"+size)
+                .DeBERTaLabelErrorCount(zeroCountDeBERTaLabel+"/"+size)
+                .BARTLabelErrorCount(zeroCountBARTLabel+"/"+size)
+                .ELECTRALabelErrorCount(zeroCountELECTRALabel+"/"+size)
                 .promptEntity(csvDataList)
                 .build());
 
@@ -66,7 +96,10 @@ public class EvaluationService {
                 .llmModel(evaluation.getLlmModel())
                 .promptEntity(evaluation.getPromptEntity())
                 .member(evaluation.getMember())
-                .percentage(evaluation.getPercentage())
+                .RoBERTaLabelErrorCount(evaluation.getRoBERTaLabelErrorCount())
+                .DeBERTaLabelErrorCount(evaluation.getDeBERTaLabelErrorCount())
+                .BARTLabelErrorCount(evaluation.getBARTLabelErrorCount())
+                .ELECTRALabelErrorCount(evaluation.getELECTRALabelErrorCount())
                 .build();
     }
 }

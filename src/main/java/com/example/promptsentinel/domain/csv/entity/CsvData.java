@@ -39,6 +39,7 @@ public class CsvData extends BaseTimeEntity {
     @Column
     private int ELECTRALabel;
 
+
     public CsvData(String strategy, String question, String response,  int RoBERTaLabel, int DeBERTaLabel, int BARTLabel, int ELECTRALabel){
         this.strategy = strategy;
         this.question = question;
