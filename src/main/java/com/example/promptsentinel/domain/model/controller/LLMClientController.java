@@ -56,7 +56,7 @@ public class LLMClientController {
             // 4. 분류된 CSV를 DB에 저장
             List<CsvData> csvDataList = csvService.readCSVFile(classifiedFileName);
 
-            csvService.saveToDatabase(csvDataList);
+           // csvService.saveToDatabase(csvDataList);
 
 
 

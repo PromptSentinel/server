@@ -76,7 +76,10 @@ public class CsvService {
     public void saveToDatabase(List<CsvData> csvDataList) {
         List<CsvData> entities = new ArrayList<>();
 
+        log.info("size : " + csvDataList.size()) ;
+
         for (CsvData csvData : csvDataList) {
+            log.info("csvData : "+ csvData.getStrategy() + " "+ csvData.getQuestion() + " "+ csvData.getResponse() + " "+csvData.getRoBERTaLabel() );
             CsvData entity = new CsvData();
             entity.setStrategy(csvData.getStrategy());
             entity.setQuestion(csvData.getQuestion());
@@ -147,6 +150,8 @@ public class CsvService {
                     csvData.setBARTLabel(0);
                     csvData.setELECTRALabel(0);
                 }
+
+                csvDataRepository.save(csvData);
 
                 return csvData;
             }
