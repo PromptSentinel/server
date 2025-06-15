@@ -149,7 +149,7 @@ public class LLMClientService {
         HttpHeaders headers = new HttpHeaders();
 
         headers.setContentType(MediaType.APPLICATION_JSON);
-        headers.setAcceptCharset(List.of(StandardCharsets.UTF_8));
+       // headers.setAcceptCharset(List.of(StandardCharsets.UTF_8));
 
         List<String> headerList = llmModel.getHeaderList();
         for (String header : headerList) {
@@ -173,17 +173,72 @@ public class LLMClientService {
         return headers;
     }
 
+    /*
+    private HttpHeaders createHeaders(LLMModel llmModel) {
+    HttpHeaders headers = new HttpHeaders();
+    headers.setContentType(MediaType.APPLICATION_JSON);
+
+    List<String> headerList = llmModel.getHeaderList();
+    for (String header : headerList) {
+        if (header == null || !header.contains(":")) continue;
+
+        String[] keyValue = header.split(":", 2);
+        String key = keyValue[0].trim();
+        String value = keyValue[1].trim();
+
+        headers.add(key, value); // Authorization도 그냥 여기서 추가
+    }
+
+    return headers;
+}
+     */
+
 
     //사용자에게 입력받은 request로 body 생성
-    private String createRequestBody(LLMModel llmModel, String prompt) throws JsonProcessingException {
+//    private String createRequestBody(LLMModel llmModel, String prompt) throws JsonProcessingException {
+//        String requestTemplate = llmModel.getRequestFormat();
+//
+//        log.info("request template" + requestTemplate);
+//        ObjectMapper objectMapper = new ObjectMapper();
+//        JsonNode node = objectMapper.readTree(requestTemplate);
+//        ((ObjectNode) node).put("prompt", prompt);
+//        return objectMapper.writeValueAsString(node);
+//    }
+    private String createRequestBody(LLMModel llmModel, String prompt) {
         String requestTemplate = llmModel.getRequestFormat();
+        String modelName = llmModel.getModelName();
 
-        log.info("request template" + requestTemplate);
-        ObjectMapper objectMapper = new ObjectMapper();
-        JsonNode node = objectMapper.readTree(requestTemplate);
-        ((ObjectNode) node).put("prompt", prompt);
-        return objectMapper.writeValueAsString(node);
+        // JSON-safe escape (따옴표, 줄바꿈 등 처리)
+        String escapedPrompt = escapeJson(prompt);
+        String escapedModel = escapeJson(modelName);
+
+        // 플레이스홀더 치환
+        String filled = requestTemplate
+                .replace("{prompt}", escapedPrompt)
+                .replace("{modelName}", escapedModel);
+
+        try {
+            // JSON 유효성 검사
+            Object parsed = new ObjectMapper().readValue(filled, Object.class);
+            return new ObjectMapper().writeValueAsString(parsed);
+        } catch (Exception e) {
+            System.err.println("⚠️ JSON 파싱 실패. Raw 문자열 그대로 반환합니다.");
+            return filled;
+        }
     }
+
+    private String escapeJson(String str) {
+        if (str == null) return "";
+        return str.replace("\\", "\\\\")
+                .replace("\"", "\\\"")
+                .replace("\n", "\\n")
+                .replace("\r", "\\r");
+    }
+
+
+
+
+
 
     private String getResponse(String responseBody, String attributeName) {
         try {
