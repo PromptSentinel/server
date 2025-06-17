@@ -26,9 +26,12 @@ public class CsvService {
             // CSV 헤더
             writer.append("index,scenario_name,strategy,prompt,response\n");
 
+
             // 데이터 생성 및 작성
             for (int i = 0; i < llmResponseList.size(); i++) {
                 LLMResponse llmResponse = llmResponseList.get(i);
+
+                log.info("CSV scenario_name : " + llmResponse.getScenarioName());
 
                 writer.append(String.valueOf(i + 1)).append(","); // 인덱스 번호
                 writer.append("\"").append(escapeCsvValue(llmResponse.getScenarioName())).append("\",");

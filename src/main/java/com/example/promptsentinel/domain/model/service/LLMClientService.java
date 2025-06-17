@@ -45,6 +45,8 @@ public class LLMClientService {
         for (int i=0; i<10; i++) {
             Prompt promptEntity = promptEntities.get(i);
             try {
+
+                log.info("scnearioName : " + promptEntity.getScenarioName());
                 String promptText = promptEntity.getGeneratedPrompt();
                 String response = sendPrompt(llmModel, promptText);
                 log.info("Prompt ID: {}, Question: {}, Response: {}",
@@ -69,6 +71,7 @@ public class LLMClientService {
 
                 LLMResponse errorResponse = LLMResponse.builder()
                         .promptId(promptEntity.getId())
+                        .scenarioName(promptEntity.getScenarioName())
                         .strategy(promptEntity.getStrategy())
                         .llmRequest(promptEntity.getGeneratedPrompt())
                         .llmResponse("Error: " + e.getMessage())
