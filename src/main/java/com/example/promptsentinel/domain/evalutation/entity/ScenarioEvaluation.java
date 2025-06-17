@@ -1,7 +1,10 @@
 package com.example.promptsentinel.domain.evalutation.entity;
 
+import com.example.promptsentinel.domain.csv.entity.CsvData;
 import jakarta.persistence.*;
 import lombok.*;
+
+import java.util.List;
 
 @Entity
 @Table(name = "scenario_evaluation")
@@ -43,4 +46,12 @@ public class ScenarioEvaluation {
 
     @Column
     private String ELECTRALabelErrorCount;
+
+    @OneToMany
+    @JoinTable(
+            name = "scenario_evaluation_prompt_entity",
+            joinColumns = @JoinColumn(name = "scenario_evaluation_id"),
+            inverseJoinColumns = @JoinColumn(name = "prompt_entity_id")
+    )
+    private List<CsvData> promptEntity;
 }

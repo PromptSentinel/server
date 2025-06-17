@@ -44,11 +44,11 @@ public class Evaluation extends BaseTimeEntity {
     private String ELECTRALabelErrorCount;
 
 
-    @OneToMany
-    @JoinTable(
-            name = "evaluation_prompt_entity",
-            joinColumns = @JoinColumn(name = "evaluation_id"),
-            inverseJoinColumns = @JoinColumn(name = "prompt_entity_id")
-    )
-    private List<CsvData> promptEntity;
+//    @OneToMany
+//    @JoinTable(
+//            name = "evaluation_prompt_entity",
+//            joinColumns = @JoinColumn(name = "evaluation_id"),
+//            inverseJoinColumns = @JoinColumn(name = "prompt_entity_id")
+//    )
+//    private List<CsvData> promptEntity;
 }

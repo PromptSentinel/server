@@ -18,6 +18,7 @@ public class CsvData extends BaseTimeEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+
     @Column(columnDefinition = "TEXT")
     private String scenarioName;
 

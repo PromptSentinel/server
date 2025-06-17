@@ -1,32 +1,30 @@
 package com.example.promptsentinel.domain.evalutation.dto;
 
 import com.example.promptsentinel.domain.csv.entity.CsvData;
-import com.example.promptsentinel.domain.member.entity.Member;
-import com.example.promptsentinel.domain.model.entity.LLMModel;
 import jakarta.persistence.Column;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.Setter;
 
 import java.util.List;
 
 @Getter
+@Setter
 @Builder
-public class EvaluationDetailResponse {
-    Long id;
+public class ScenarioListResponse {
+    private String strategy;
+    private String scenario;
 
-    private Member member;
-
-    private LLMModel llmModel;
-
+    @Column
     private String RoBERTaLabelErrorCount;
 
+    @Column
     private String DeBERTaLabelErrorCount;
 
+    @Column
     private String BARTLabelErrorCount;
 
+    @Column
     private String ELECTRALabelErrorCount;
-
-    List<StrategyResponse> strategyResponseList;
-
-    //private List<CsvData> promptEntity;
+    List<CsvData> csvDataList;
 }

@@ -1,12 +1,11 @@
 package com.example.promptsentinel.domain.evalutation.service;
 
+import com.example.promptsentinel.domain.csv.dao.CsvDataRepository;
 import com.example.promptsentinel.domain.csv.entity.CsvData;
 import com.example.promptsentinel.domain.evalutation.dao.EvaluationRepository;
 import com.example.promptsentinel.domain.evalutation.dao.ScenarioEvaluationRepository;
 import com.example.promptsentinel.domain.evalutation.dao.StrategyEvaluationRepository;
-import com.example.promptsentinel.domain.evalutation.dto.EvaluationDetailResponse;
-import com.example.promptsentinel.domain.evalutation.dto.EvaluationListResponse;
-import com.example.promptsentinel.domain.evalutation.dto.EvaluationResponse;
+import com.example.promptsentinel.domain.evalutation.dto.*;
 import com.example.promptsentinel.domain.evalutation.entity.Evaluation;
 import com.example.promptsentinel.domain.evalutation.entity.ScenarioEvaluation;
 import com.example.promptsentinel.domain.evalutation.entity.StrategyEvaluation;
@@ -18,6 +17,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -28,6 +28,7 @@ public class EvaluationService {
     private final EvaluationRepository evaluationRepository;
     private final ScenarioEvaluationRepository scenarioEvaluationRepository;
     private final StrategyEvaluationRepository strategyEvaluationRepository;
+    private final CsvDataRepository csvDataRepository;
     private final MemberRepository memberRepository;
     public EvaluationListResponse getEvaluaionList(Long memberId) {
         Member member = memberRepository.findByIdOrElseThrow(memberId);
@@ -60,7 +61,7 @@ public class EvaluationService {
                 .DeBERTaLabelErrorCount(evaluation.getDeBERTaLabelErrorCount())
                 .BARTLabelErrorCount(evaluation.getBARTLabelErrorCount())
                 .ELECTRALabelErrorCount(evaluation.getELECTRALabelErrorCount())
-                .promptEntity(evaluation.getPromptEntity())
+                .strategyResponseList(getStrategyResponse(evaluation))
                 .member(evaluation.getMember())
                 .build();
     }
@@ -96,16 +97,17 @@ public class EvaluationService {
                 .DeBERTaLabelErrorCount(oneCountDeBERTaLabel+"/"+size)
                 .BARTLabelErrorCount(oneCountBARTLabel+"/"+size)
                 .ELECTRALabelErrorCount(oneCountELECTRALabel+"/"+size)
-                .promptEntity(csvDataList)
+                //.promptEntity(csvDataList)
                 .build());
 
         saveStrategyAndScenarioEvaluation(csvDataList, evaluation);
 
 
+
         return EvaluationDetailResponse.builder()
                 .id(evaluation.getId())
                 .llmModel(evaluation.getLlmModel())
-                .promptEntity(evaluation.getPromptEntity())
+                .strategyResponseList(getStrategyResponse(evaluation))
                 .member(evaluation.getMember())
                 .RoBERTaLabelErrorCount(evaluation.getRoBERTaLabelErrorCount())
                 .DeBERTaLabelErrorCount(evaluation.getDeBERTaLabelErrorCount())
@@ -113,6 +115,50 @@ public class EvaluationService {
                 .ELECTRALabelErrorCount(evaluation.getELECTRALabelErrorCount())
                 .build();
     }
+    private List<StrategyResponse> getStrategyResponse(Evaluation evaluation){
+        List<StrategyEvaluation> strategyEvaluationList = strategyEvaluationRepository.findByEvaluationOrElseThrow(evaluation);
+
+        List<StrategyResponse> strategyResponseList = new ArrayList<>();
+
+        for(StrategyEvaluation strategyEvaluation : strategyEvaluationList) {
+            StrategyResponse strategyResponse = StrategyResponse.builder()
+                    .strategy(strategyEvaluation.getStrategy())
+                    .BARTLabelErrorCount(strategyEvaluation.getBARTLabelErrorCount())
+                    .DeBERTaLabelErrorCount(strategyEvaluation.getDeBERTaLabelErrorCount())
+                    .RoBERTaLabelErrorCount(strategyEvaluation.getRoBERTaLabelErrorCount())
+                    .ELECTRALabelErrorCount(strategyEvaluation.getELECTRALabelErrorCount())
+                    .scenarioListResponseList(getScenarioListResponse(evaluation, strategyEvaluation.getStrategy()))
+                    .build();
+
+            strategyResponseList.add(strategyResponse);
+
+        }
+        return strategyResponseList;
+
+
+    }
+
+    private List<ScenarioListResponse> getScenarioListResponse(Evaluation evaluation, String strategy){
+        List<ScenarioEvaluation> scenarioEvaluationList = scenarioEvaluationRepository.findByEvaluationAndStrategyOrElseThrow(evaluation, strategy);
+
+        List<ScenarioListResponse> scenarioListResponseList = new ArrayList<>();
+
+        for(ScenarioEvaluation scenarioEvaluation : scenarioEvaluationList){
+            ScenarioListResponse scenarioListResponse = ScenarioListResponse.builder()
+                    .scenario(scenarioEvaluation.getScenarioName())
+                    .strategy(scenarioEvaluation.getStrategy())
+                    .BARTLabelErrorCount(scenarioEvaluation.getBARTLabelErrorCount())
+                    .DeBERTaLabelErrorCount(scenarioEvaluation.getDeBERTaLabelErrorCount())
+                    .RoBERTaLabelErrorCount(scenarioEvaluation.getRoBERTaLabelErrorCount())
+                    .ELECTRALabelErrorCount(scenarioEvaluation.getELECTRALabelErrorCount())
+                    .csvDataList(scenarioEvaluation.getPromptEntity())
+                    .build();
+
+            scenarioListResponseList.add(scenarioListResponse);
+        }
+        return scenarioListResponseList;
+    }
+
 
     private void saveStrategyAndScenarioEvaluation(List<CsvData> csvDataList, Evaluation evaluation) {
         int strategySize = 0;
@@ -132,11 +178,14 @@ public class EvaluationService {
         String strategy = csvDataList.get(0).getStrategy();
         String scenario = csvDataList.get(0).getScenarioName();
 
+        List<CsvData> csvDatas = new ArrayList<>();
+
         for(CsvData csvData : csvDataList){
             String currentStrategy = csvData.getStrategy();
             String currentScenario = csvData.getScenarioName();
 
             if(!strategy.equals(currentStrategy)){
+                log.info("strategy : 1111");
                 strategy = currentStrategy;
 
                 strategyEvaluationRepository.save(StrategyEvaluation.builder()
@@ -161,7 +210,9 @@ public class EvaluationService {
 
             if(!scenario.equals(currentScenario)){
                 scenario = currentScenario;
+                log.info("scenario : 1111");
 
+                log.info("csvData : "+csvDataList.size());
                 scenarioEvaluationRepository.save(ScenarioEvaluation.builder()
                         .evaluation(evaluation)
                         .strategy(strategy)
@@ -170,10 +221,11 @@ public class EvaluationService {
                         .DeBERTaLabelErrorCount(DeBERTaLabelScenarioCount+"/"+scenarioSize)
                         .BARTLabelErrorCount(BARTLabelScenarioCount+"/"+scenarioSize)
                         .ELECTRALabelErrorCount(ELECTRALabelScenarioCount+"/"+scenarioSize)
+                        .promptEntity(csvDatas)
                         .build()
                 );
 
-
+                csvDatas = new ArrayList<>();
                 RoBERTaLabelScenarioCount = 0;
                 DeBERTaLabelScenarioCount = 0;
                 BARTLabelScenarioCount = 0;
@@ -182,7 +234,7 @@ public class EvaluationService {
             }
 
 
-
+            csvDatas.add(csvData);
             strategySize++;
             scenarioSize++;
             if(csvData.getRoBERTaLabel()==1){
@@ -202,6 +254,27 @@ public class EvaluationService {
                 ELECTRALabelScenarioCount++;
             }
         }
+        strategyEvaluationRepository.save(StrategyEvaluation.builder()
+                .evaluation(evaluation)
+                .strategy(strategy)
+                .RoBERTaLabelErrorCount(RoBERTaLabelStrategyCount+"/"+strategySize)
+                .DeBERTaLabelErrorCount(DeBERTaLabelStrategyCount+"/"+strategySize)
+                .BARTLabelErrorCount(BARTLabelStrategyCount+"/"+strategySize)
+                .ELECTRALabelErrorCount(ELECTRALabelStrategyCount+"/"+strategySize)
+                .build()
+        );
+
+        scenarioEvaluationRepository.save(ScenarioEvaluation.builder()
+                .evaluation(evaluation)
+                .strategy(strategy)
+                .scenarioName(scenario)
+                .RoBERTaLabelErrorCount(RoBERTaLabelScenarioCount+"/"+scenarioSize)
+                .DeBERTaLabelErrorCount(DeBERTaLabelScenarioCount+"/"+scenarioSize)
+                .BARTLabelErrorCount(BARTLabelScenarioCount+"/"+scenarioSize)
+                .ELECTRALabelErrorCount(ELECTRALabelScenarioCount+"/"+scenarioSize)
+                .promptEntity(csvDatas)
+                .build()
+        );
     }
 
 }

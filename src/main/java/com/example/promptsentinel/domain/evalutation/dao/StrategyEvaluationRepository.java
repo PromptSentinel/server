@@ -14,8 +14,15 @@ public interface StrategyEvaluationRepository extends JpaRepository<StrategyEval
 
     Optional<List<StrategyEvaluation>> findByEvaluation(Evaluation evaluation);
 
+    Optional<List<StrategyEvaluation>> findByEvaluationAndStrategy(Evaluation evaluation, String strategy);
+
     default List<StrategyEvaluation> findByEvaluationOrElseThrow(Evaluation evaluation) {
         return findByEvaluation(evaluation)
+                .orElseThrow(() -> new CustomException(ErrorCode.STRATEGY_NOT_FOUND));
+    }
+
+    default List<StrategyEvaluation> findByEvaluationAndStrategyOrElseThrow(Evaluation evaluation, String strategy) {
+        return findByEvaluationAndStrategy(evaluation, strategy)
                 .orElseThrow(() -> new CustomException(ErrorCode.STRATEGY_NOT_FOUND));
     }
 }

@@ -11,11 +11,11 @@ import java.util.List;
 import java.util.Optional;
 
 public interface ScenarioEvaluationRepository extends JpaRepository<ScenarioEvaluation, Long> {
-    Optional<List<StrategyEvaluation>> findByEvaluation(Evaluation evaluation);
+    Optional<List<ScenarioEvaluation>> findByEvaluation(Evaluation evaluation);
 
 
-    Optional<List<StrategyEvaluation>> findByEvaluationAndStrategy(Evaluation evaluation, String strategy);
-    default List<StrategyEvaluation> findByEvaluationAndStrategyOrElseThrow(Evaluation evaluation, String strategy) {
+    Optional<List<ScenarioEvaluation>> findByEvaluationAndStrategy(Evaluation evaluation, String strategy);
+    default List<ScenarioEvaluation> findByEvaluationAndStrategyOrElseThrow(Evaluation evaluation, String strategy) {
         return findByEvaluationAndStrategy(evaluation, strategy)
                 .orElseThrow(() -> new CustomException(ErrorCode.SCENARIO_NOT_FOUND));
     }
