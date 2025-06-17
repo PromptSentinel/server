@@ -1,4 +1,4 @@
-package com.example.promptsentinel.domain.evalutation;
+package com.example.promptsentinel.domain.evalutation.entity;
 
 import com.example.promptsentinel.domain.csv.entity.CsvData;
 import com.example.promptsentinel.domain.member.entity.Member;
@@ -44,11 +44,11 @@ public class Evaluation extends BaseTimeEntity {
     private String ELECTRALabelErrorCount;
 
 
-    @OneToMany
-    @JoinTable(
-            name = "evaluation_prompt_entity",
-            joinColumns = @JoinColumn(name = "evaluation_id"),
-            inverseJoinColumns = @JoinColumn(name = "prompt_entity_id")
-    )
-    private List<CsvData> promptEntity;
+//    @OneToMany
+//    @JoinTable(
+//            name = "evaluation_prompt_entity",
+//            joinColumns = @JoinColumn(name = "evaluation_id"),
+//            inverseJoinColumns = @JoinColumn(name = "prompt_entity_id")
+//    )
+//    private List<CsvData> promptEntity;
 }

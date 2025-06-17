@@ -52,6 +52,7 @@ public class LLMClientService {
 
                 LLMResponse llmResponse = LLMResponse.builder()
                         .promptId(promptEntity.getId())
+                        .scenarioName(promptEntity.getScenarioName())
                         .strategy(promptEntity.getStrategy())
                         .llmRequest(promptText)
                         .llmResponse(response)

@@ -1,4 +1,4 @@
-package com.example.promptsentinel.domain.evalutation;
+package com.example.promptsentinel.domain.evalutation.entity;
 
 import com.example.promptsentinel.domain.member.entity.Member;
 import com.example.promptsentinel.domain.model.entity.LLMModel;

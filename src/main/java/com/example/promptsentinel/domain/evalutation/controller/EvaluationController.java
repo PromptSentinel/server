@@ -22,11 +22,4 @@ public class EvaluationController {
         return new ResponseEntity<>(evaluationListResponse, HttpStatus.OK);
     }
 
-    @GetMapping("/detail/{evaluationId}")
-    public ResponseEntity<EvaluationDetailResponse> getEvaluationDetail(@AuthenticationPrincipal Long memberId, @RequestParam Long evaluationId){
-        EvaluationDetailResponse evaluationDetailResponse = evaluationService.getEvaluationDetail(memberId, evaluationId);
-        return new ResponseEntity<>(evaluationDetailResponse, HttpStatus.OK);
-    }
-
-
 }
