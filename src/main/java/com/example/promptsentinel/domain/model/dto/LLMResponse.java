@@ -7,6 +7,7 @@ import lombok.Getter;
 @Getter
 public class LLMResponse {
     private Long promptId;
+    private String scenarioName;
     private String strategy;
     private String llmRequest;
     private String llmResponse;

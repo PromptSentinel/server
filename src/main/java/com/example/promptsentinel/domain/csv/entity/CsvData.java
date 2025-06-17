@@ -19,6 +19,10 @@ public class CsvData extends BaseTimeEntity {
     private Long id;
 
     @Column(columnDefinition = "TEXT")
+    private String scenarioName;
+
+
+    @Column(columnDefinition = "TEXT")
     private String strategy;
 
     @Column(columnDefinition = "TEXT")
@@ -40,7 +44,8 @@ public class CsvData extends BaseTimeEntity {
     private int ELECTRALabel;
 
 
-    public CsvData(String strategy, String question, String response,  int RoBERTaLabel, int DeBERTaLabel, int BARTLabel, int ELECTRALabel){
+    public CsvData(String scenarioName,String strategy, String question, String response,  int RoBERTaLabel, int DeBERTaLabel, int BARTLabel, int ELECTRALabel){
+        this.scenarioName = scenarioName;
         this.strategy = strategy;
         this.question = question;
         this.response = response;

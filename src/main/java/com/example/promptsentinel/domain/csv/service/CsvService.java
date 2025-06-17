@@ -24,13 +24,14 @@ public class CsvService {
     public void generateQACSV(List<LLMResponse> llmResponseList, String fileName) throws IOException {
         try (FileWriter writer = new FileWriter(fileName, StandardCharsets.UTF_8)) {
             // CSV 헤더
-            writer.append("index,strategy,prompt,response\n");
+            writer.append("index,scenario_name,strategy,prompt,response\n");
 
             // 데이터 생성 및 작성
             for (int i = 0; i < llmResponseList.size(); i++) {
                 LLMResponse llmResponse = llmResponseList.get(i);
 
                 writer.append(String.valueOf(i + 1)).append(","); // 인덱스 번호
+                writer.append("\"").append(escapeCsvValue(llmResponse.getScenarioName())).append("\",");
                 writer.append("\"").append(escapeCsvValue(llmResponse.getStrategy())).append("\",");
                 writer.append("\"").append(escapeCsvValue(llmResponse.getLlmRequest())).append("\","); // prompt 또는 question
                 writer.append("\"").append(escapeCsvValue(llmResponse.getLlmResponse())).append("\"");
@@ -81,6 +82,7 @@ public class CsvService {
         for (CsvData csvData : csvDataList) {
             log.info("csvData : "+ csvData.getStrategy() + " "+ csvData.getQuestion() + " "+ csvData.getResponse() + " "+csvData.getRoBERTaLabel() );
             CsvData entity = new CsvData();
+            entity.setScenarioName(csvData.getScenarioName());
             entity.setStrategy(csvData.getStrategy());
             entity.setQuestion(csvData.getQuestion());
             entity.setResponse(csvData.getResponse());
@@ -132,16 +134,17 @@ public class CsvService {
             // CSV 읽기용: strategy, prompt, response, RoBERTaLabel, DeBERTaLabel, BARTLabel, ELECTRALabel
             if (fields.size() >= 4) {
                 CsvData csvData = new CsvData();
-                csvData.setStrategy(fields.get(1));
-                csvData.setQuestion(fields.get(2));
-                csvData.setResponse(fields.get(3));
+                csvData.setScenarioName(fields.get(1));
+                csvData.setStrategy(fields.get(2));
+                csvData.setQuestion(fields.get(3));
+                csvData.setResponse(fields.get(4));
 
                 // 라벨 필드들 파싱 (숫자로 변환)
                 try {
-                    csvData.setRoBERTaLabel(extractLabelNumber(fields.get(4).trim()));
-                    csvData.setDeBERTaLabel(extractLabelNumber(fields.get(5).trim()));
-                    csvData.setBARTLabel(extractLabelNumber(fields.get(6).trim()));
-                    csvData.setELECTRALabel(extractLabelNumber(fields.get(7).trim()));
+                    csvData.setRoBERTaLabel(extractLabelNumber(fields.get(5).trim()));
+                    csvData.setDeBERTaLabel(extractLabelNumber(fields.get(6).trim()));
+                    csvData.setBARTLabel(extractLabelNumber(fields.get(7).trim()));
+                    csvData.setELECTRALabel(extractLabelNumber(fields.get(8).trim()));
                 } catch (NumberFormatException e) {
                     System.err.println("라벨 값 파싱 오류: " + line);
                     // 기본값 설정

@@ -1,35 +1,31 @@
-package com.example.promptsentinel.domain.evalutation;
+package com.example.promptsentinel.domain.evalutation.entity;
 
 import com.example.promptsentinel.domain.csv.entity.CsvData;
 import com.example.promptsentinel.domain.member.entity.Member;
-import com.example.promptsentinel.domain.model.entity.LLMModel;
-import com.example.promptsentinel.global.common.entity.BaseTimeEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Table(name = "evaluation")
+@Table(name = "strategy_evaluation")
 @Getter
 @Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class Evaluation extends BaseTimeEntity {
+public class StrategyEvaluation {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long id;
 
 
     @ManyToOne
-    @JoinColumn(name = "member_id")
-    private Member member;
+    @JoinColumn(name = "evaluation_id")
+    private Evaluation evaluation;
 
-    @OneToOne
-    @JoinColumn(name = "llm_model_id")
-    private LLMModel llmModel;
+    @Column
+    private String strategy;
 
     @Column
     private String RoBERTaLabelErrorCount;
@@ -43,7 +39,6 @@ public class Evaluation extends BaseTimeEntity {
     @Column
     private String ELECTRALabelErrorCount;
 
-
     @OneToMany
     @JoinTable(
             name = "evaluation_prompt_entity",
@@ -51,4 +46,5 @@ public class Evaluation extends BaseTimeEntity {
             inverseJoinColumns = @JoinColumn(name = "prompt_entity_id")
     )
     private List<CsvData> promptEntity;
+
 }

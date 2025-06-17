@@ -16,7 +16,9 @@ public enum ErrorCode {
     LLM_API_FAILED(HttpStatus.BAD_REQUEST, "LLM API 요청에 실패하였습니다."),
     ATTROBUTE_NOT_FOUND(HttpStatus.NOT_FOUND, "response 형식에서 resonse_text를 찾을 수 없습니다."),
     LLM_PARSE_FAIRED(HttpStatus.BAD_REQUEST, "LLM response parse에 실패하였습니다."),
-    EVALUATION_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 evaluation입니다.");
+    EVALUATION_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 evaluation입니다."),
+    STRATEGY_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 strategy evaluation입니다." ),
+    SCENARIO_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 scenario evaluation입니다.");
 
 
     private final HttpStatus status;
