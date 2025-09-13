@@ -1,0 +1,46 @@
+server:
+  port: 8080
+
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/promptSentinel_db?serverTimezone=UTC
+    username: user
+    password: PromptSentinel
+
+  redis:
+    host: localhost
+    port: 6379
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+    database-platform: org.hibernate.dialect.MySQL8Dialect
+
+
+jwt:
+  access-token-secret: baf83c1c1ae1030bee8233855909c87f559a538cdebe57455a61a20ee3f8853743b7e5dad5a568b55462fa11bd508aee38bf1c2f8a11659461180e0940fae2f0
+  refresh-token-secret: 997365db9f07f9fa1d0927a87ba1ae94f7f1c4e0163f5c524ccbf203356d64e685c1c03a48e0c7ce9ad83b0ab6877a708f39bc62a761d5b1b42d2d339adcc106
+  access-token-expiration: 86400000
+  refresh-token-expiration: 1209600000
+
+security:
+  oauth2:
+    client:
+      registration:
+        kakao:
+          client-id: fb9c13b45ed972631ed4d9428f9a55c3  # 앱키 -> REST API 키
+          client-secret: At1l817jfuXzrCmPfAxfWTnVAC3DxRjA # 카카오 로그인 -> 보안 -> Client Secret 코드
+          authorization-grant-type: authorization_code
+          redirect-uri: "http://localhost:8080/api/v1/auth/register" # yml 파일에서 {} 가 spring 특수문자로 인식되게 하기 위해 " " 사용
+          client-authentication-method: POST
+      provider:
+        kakao:
+          authorization-uri: https://kauth.kakao.com/oauth/authorize
+          token-uri: https://kauth.kakao.com/oauth/token
+          user-info-uri: https://kapi.kakao.com/v2/user/me
+          user-name-attribute: id
